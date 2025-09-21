@@ -6,7 +6,7 @@ public class Appointment
     public string Reason { get; private set; } = string.Empty;
     public AppointmentStatus Status { get; private set; }
     public Guid PatientId { get; private set; }
-    public virtual User Patient { get; private set; } = null!;
+    public virtual Patient Patient { get; private set; } = null!;
     public Guid ScheduleId { get; private set; }
     public virtual Schedule Schedule { get; private set; } = null!;
     public DateTime CreatedAt { get; private set; }

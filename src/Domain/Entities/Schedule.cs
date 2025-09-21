@@ -17,6 +17,7 @@ public class Schedule
     public Guid Id { get; private set; }
     public Guid PhysicianId { get; private set; }
     public Physician Physician { get; private set; } = null!;
+    public List<Appointment> Appointments { get; private set; } = [];
     public DateTime StartTime { get; private set; }
     public DateTime EndTime { get; private set; }
     public DateTime CreatedAt { get; private set; }
