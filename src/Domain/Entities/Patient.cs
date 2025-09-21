@@ -9,7 +9,7 @@ public class Patient
     public virtual ICollection<Appointment> Appointments { get; private set; } = [];
     public Patient()
     {
-        
+
     }
     public Patient(DateTime dateOfBirth, Guid userId)
     {

@@ -23,7 +23,7 @@ public class Appointment
     }
     public Appointment()
     {
-        
+
     }
     public void UpdateStatus(AppointmentStatus newStatus)
     {

@@ -12,7 +12,7 @@ public class Schedule
     }
     public Schedule()
     {
-        
+
     }
     public Guid Id { get; private set; }
     public Guid PhysicianId { get; private set; }

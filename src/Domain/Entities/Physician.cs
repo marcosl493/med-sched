@@ -21,7 +21,7 @@ public class Physician
     }
     public Physician()
     {
-        
+
     }
     public void AddAvailableSlots(List<Schedule> slotsToAdd)
     {
@@ -37,7 +37,7 @@ public class Physician
         {
             AvailableSlots.Add(item);
         }
-        
+
     }
     private static bool HasOverlappingSlots(List<Schedule> slots)
     {

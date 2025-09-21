@@ -1,5 +1,5 @@
-using Scalar.AspNetCore;
 using Infrastructure;
+using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services

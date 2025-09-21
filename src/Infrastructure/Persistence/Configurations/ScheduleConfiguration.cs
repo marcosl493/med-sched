@@ -23,7 +23,7 @@ public class ScheduleConfiguration : IEntityTypeConfiguration<Schedule>
             .WithOne(a => a.Schedule)
             .HasForeignKey(a => a.ScheduleId)
             .OnDelete(DeleteBehavior.Cascade);
-        
+
         builder.HasIndex(s => new { s.PhysicianId, s.StartTime, s.EndTime }).IsUnique();
     }
 }

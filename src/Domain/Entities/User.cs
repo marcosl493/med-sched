@@ -13,7 +13,7 @@ public class User
     }
     public User()
     {
-        
+
     }
     public Guid Id { get; private set; }
     public string Name { get; private set; } = string.Empty;
@@ -25,7 +25,7 @@ public class User
 }
 public enum UserRole
 {
-    ADMIN = 1 ,
+    ADMIN = 1,
     PHYSICIAN,
     PATIENT
 }

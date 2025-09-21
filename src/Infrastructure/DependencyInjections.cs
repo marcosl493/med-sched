@@ -11,7 +11,7 @@ public static class DependencyInjections
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
 
-        services.AddDbContext<MedSchedDbContext>((sp,options) =>
+        services.AddDbContext<MedSchedDbContext>((sp, options) =>
             options.UseNpgsql
             (
                 sp.GetRequiredService<IConfiguration>().BuildConnectionString(nameof(MedSchedDbContext)),
@@ -28,5 +28,5 @@ public static class DependencyInjections
         sb.Append($"Username={username};Password={password}");
         return sb.ToString();
     }
-       
+
 }
