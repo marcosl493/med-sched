@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Text;
 
 namespace Infrastructure;
@@ -17,6 +18,7 @@ public static class DependencyInjections
                 sp.GetRequiredService<IConfiguration>().BuildConnectionString(nameof(MedSchedDbContext)),
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(MedSchedDbContext).Assembly.FullName))
             );
+        services.AddLogging();
         return services;
     }
     private static string BuildConnectionString(this IConfiguration configuration, string name)
@@ -27,6 +29,14 @@ public static class DependencyInjections
         var sb = new StringBuilder(connectionString);
         sb.Append($"Username={username};Password={password}");
         return sb.ToString();
+    }
+    private static IServiceCollection AddLogging(this IServiceCollection services)
+    {
+        services.AddSerilog((services, lc) => lc
+                .ReadFrom.Configuration(services.GetRequiredService<IConfiguration>())
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext());
+        return services;
     }
 
 }
