@@ -9,7 +9,7 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
 
 builder.Services
     .AddOpenApi()
-    .AddInfrastructure();
+    .AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.Run();
 

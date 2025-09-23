@@ -1,7 +1,12 @@
-﻿using Infrastructure.Persistence;
+﻿using Application.Interfaces;
+using Infrastructure.Authentication;
+using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
 
@@ -9,7 +14,7 @@ namespace Infrastructure;
 
 public static class DependencyInjections
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
 
         services.AddDbContext<MedSchedDbContext>((sp, options) =>
@@ -19,6 +24,7 @@ public static class DependencyInjections
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(MedSchedDbContext).Assembly.FullName))
             );
         services.AddLogging();
+        services.AddAuth(configuration);
         return services;
     }
     private static string BuildConnectionString(this IConfiguration configuration, string name)
@@ -36,6 +42,41 @@ public static class DependencyInjections
                 .ReadFrom.Configuration(services.GetRequiredService<IConfiguration>())
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext());
+        return services;
+    }
+    private static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        using var sp = services.BuildServiceProvider();
+        var jwtOptions = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
+        services.AddScoped<ITokenService, JwtService>();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidAudience = jwtOptions.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SecretKey)),
+
+                    };
+                });
+        services.AddAuthorizationBuilder()
+            .AddPolicy("JwtPolicy", policy =>
+            {
+                policy.RequireClaim("iss", jwtOptions.Issuer);
+                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireAuthenticatedUser();
+            });
         return services;
     }
 
