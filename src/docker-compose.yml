@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: ""
+    ports:
+      - "5432:5432"
+  webapi:
+    image: ${DOCKER_REGISTRY-}webapi
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DB_USERNAME: "postgres"
+      DB_PASSWORD: ""
+    build:
+      context: .
+      dockerfile: WebApi/Dockerfile
