@@ -1,5 +1,6 @@
 using Infrastructure;
 using Scalar.AspNetCore;
+using WebApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
@@ -9,7 +10,8 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
 
 builder.Services
     .AddOpenApi()
-    .AddInfrastructure(builder.Configuration);
+    .AddInfrastructure(builder.Configuration)
+    .AddAuth(builder.Configuration);
 
 var app = builder.Build();
 
