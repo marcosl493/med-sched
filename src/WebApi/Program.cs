@@ -23,9 +23,11 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseHttpsRedirection()
+   .UseAuthentication()
+   .UseAuthorization()
+   .UseRateLimiter();
 app.MapAuthEndpoints();
+
 app.Run();
 

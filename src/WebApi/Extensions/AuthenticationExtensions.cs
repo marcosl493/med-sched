@@ -2,9 +2,12 @@
 using Domain.Entities;
 using Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
+using WebApi.Options;
 
 namespace WebApi.Extensions;
 
@@ -49,7 +52,21 @@ public static class AuthenticationExtensions
                 policy.RequireClaim("aud", jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PATIENT));
-            }); ;
+            });
+
+        services.AddRateLimiter(options =>
+        {
+            var rateLimitConfig = configuration.GetSection(AuthenticationRateLimitOptions.SectionName)
+            .Get<AuthenticationRateLimitOptions>() ?? new AuthenticationRateLimitOptions();
+            options.AddFixedWindowLimiter(nameof(AuthenticationRateLimitOptions), opt =>
+            {
+                opt.PermitLimit = rateLimitConfig.PermitLimit;
+                opt.QueueLimit = rateLimitConfig.QueueLimit;
+                opt.Window = TimeSpan.FromSeconds(rateLimitConfig.WindowSeconds);
+                opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
         return services;
     }
 }
