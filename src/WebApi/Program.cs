@@ -1,5 +1,6 @@
 using Infrastructure;
 using Scalar.AspNetCore;
+using WebApi.Endpoints;
 using WebApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,8 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
 builder.Services
     .AddOpenApi()
     .AddInfrastructure(builder.Configuration)
-    .AddAuth(builder.Configuration);
+    .AddAuth(builder.Configuration)
+    .AddMediator();
 
 var app = builder.Build();
 
@@ -24,5 +26,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapAuthEndpoints();
 app.Run();
 

@@ -11,7 +11,7 @@ namespace Infrastructure.Authentication;
 public class JwtService(IOptionsSnapshot<JwtOptions> options) : ITokenService
 {
     private readonly JwtOptions options = options.Value;
-    public string CreateToken(Guid userId, string userEmail, UserRole role)
+    public (string AccessToken, string TokenType, ushort ExpiresIn) CreateToken(Guid userId, string userEmail, UserRole role)
     {
         var claims = new[]
            {
@@ -21,16 +21,16 @@ public class JwtService(IOptionsSnapshot<JwtOptions> options) : ITokenService
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+        var expiresInMinute = DateTime.UtcNow.AddMinutes(options.ExpiresInMinutes);
         var token = new JwtSecurityToken(
            issuer: options.Issuer,
            audience: options.Audience,
            claims: claims,
-           expires: DateTime.UtcNow.AddMinutes(options.ExpiresInMinutes),
+           expires: expiresInMinute,
            signingCredentials: creds
        );
 
-        return new JwtSecurityTokenHandler()
-            .WriteToken(token);
+        return (new JwtSecurityTokenHandler()
+            .WriteToken(token), "Bearer", (ushort)options.ExpiresInMinutes);
     }
 }
