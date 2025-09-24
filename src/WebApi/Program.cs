@@ -1,5 +1,7 @@
 using Infrastructure;
 using Scalar.AspNetCore;
+using WebApi.Endpoints;
+using WebApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
@@ -9,7 +11,9 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
 
 builder.Services
     .AddOpenApi()
-    .AddInfrastructure();
+    .AddInfrastructure(builder.Configuration)
+    .AddAuth(builder.Configuration)
+    .AddMediator();
 
 var app = builder.Build();
 
@@ -19,7 +23,11 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection()
+   .UseAuthentication()
+   .UseAuthorization()
+   .UseRateLimiter();
+app.MapAuthEndpoints();
 
 app.Run();
 

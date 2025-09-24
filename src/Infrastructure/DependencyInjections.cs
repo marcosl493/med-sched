@@ -1,4 +1,6 @@
-﻿using Infrastructure.Persistence;
+﻿using Application.Interfaces.Repositories;
+using Infrastructure.Persistence;
+using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +11,7 @@ namespace Infrastructure;
 
 public static class DependencyInjections
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
 
         services.AddDbContext<MedSchedDbContext>((sp, options) =>
@@ -18,7 +20,9 @@ public static class DependencyInjections
                 sp.GetRequiredService<IConfiguration>().BuildConnectionString(nameof(MedSchedDbContext)),
                 sqlOptions => sqlOptions.MigrationsAssembly(typeof(MedSchedDbContext).Assembly.FullName))
             );
-        services.AddLogging();
+        services
+            .AddLogging()
+            .AddRepositories();
         return services;
     }
     private static string BuildConnectionString(this IConfiguration configuration, string name)
@@ -38,5 +42,11 @@ public static class DependencyInjections
                 .Enrich.FromLogContext());
         return services;
     }
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<IUserRepository, UserRepository>();
+        return services;
+    }
+
 
 }
