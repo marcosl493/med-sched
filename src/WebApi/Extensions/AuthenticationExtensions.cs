@@ -2,11 +2,13 @@
 using Domain.Entities;
 using Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
+using WebApi.Authorization;
 using WebApi.Options;
 
 namespace WebApi.Extensions;
@@ -39,6 +41,8 @@ public static class AuthenticationExtensions
 
                     };
                 });
+
+        services.AddSingleton<IAuthorizationHandler, SameUserHandler>();
         services.AddAuthorizationBuilder()
             .AddPolicy(nameof(UserRole.PHYSICIAN), policy =>
             {
@@ -46,19 +50,21 @@ public static class AuthenticationExtensions
                 policy.RequireClaim("aud", jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PHYSICIAN));
+                policy.AddRequirements(new SameUserRequirement());
             }).AddPolicy(nameof(UserRole.PATIENT), policy =>
             {
                 policy.RequireClaim("iss", jwtOptions.Issuer);
                 policy.RequireClaim("aud", jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PATIENT));
+                policy.AddRequirements(new SameUserRequirement());
             });
 
         services.AddRateLimiter(options =>
         {
             var rateLimitConfig = configuration.GetSection(AuthenticationRateLimitOptions.SectionName)
             .Get<AuthenticationRateLimitOptions>() ?? new AuthenticationRateLimitOptions();
-            options.AddFixedWindowLimiter(nameof(AuthenticationRateLimitOptions), opt =>
+            options.AddFixedWindowLimiter(AuthenticationRateLimitOptions.SectionName, opt =>
             {
                 opt.PermitLimit = rateLimitConfig.PermitLimit;
                 opt.QueueLimit = rateLimitConfig.QueueLimit;

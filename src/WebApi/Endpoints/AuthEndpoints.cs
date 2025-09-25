@@ -4,26 +4,25 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Extensions;
 using WebApi.Options;
 
-namespace WebApi.Endpoints
+namespace WebApi.Endpoints;
+
+public static class AuthEndpoints
 {
-    public static class AuthEndpoints
+    public static void MapAuthEndpoints(this WebApplication app)
     {
-        public static void MapAuthEndpoints(this WebApplication app)
-        {
-            var routeGroupBuilder = app.MapGroup("/api/auth").WithTags("Auth");
-            routeGroupBuilder.MapPost("", Login)
-                .WithName("Login")
-                .Produces<LoginResult>(StatusCodes.Status200OK)
-                .ProducesProblem(StatusCodes.Status400BadRequest)
-                .ProducesProblem(StatusCodes.Status401Unauthorized)
-                .ProducesProblem(StatusCodes.Status500InternalServerError)
-                .WithDescription("Autentica um usuário, dado as suas credenciais.")
-                .RequireRateLimiting(AuthenticationRateLimitOptions.SectionName);
-        }
-        private static async Task<IResult> Login(LoginCommand request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
-        {
-            var result = await mediator.Send(request, cancellationToken);
-            return result.ToHttpResult();
-        }
+        var routeGroupBuilder = app.MapGroup("/api/auth").WithTags("Auth");
+        routeGroupBuilder.MapPost("", Login)
+            .WithName("Login")
+            .Produces<LoginResult>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status500InternalServerError)
+            .WithDescription("Autentica um usuário, dado as suas credenciais.")
+            .RequireRateLimiting(AuthenticationRateLimitOptions.SectionName);
+    }
+    private static async Task<IResult> Login(LoginCommand request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(request, cancellationToken);
+        return result.ToHttpResult();
     }
 }

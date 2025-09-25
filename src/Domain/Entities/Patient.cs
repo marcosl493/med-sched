@@ -11,11 +11,11 @@ public class Patient
     {
 
     }
-    public Patient(DateTime dateOfBirth, Guid userId)
+    public Patient(DateTime dateOfBirth, string name, string email, string password)
     {
         Id = Guid.CreateVersion7();
         DateOfBirth = dateOfBirth;
-        UserId = userId;
+        User = new User(name, email, UserRole.PATIENT, password);
     }
     public ICollection<Appointment> ScheduleAppointment(Guid scheduleId, string reason)
     {

@@ -13,7 +13,8 @@ builder.Services
     .AddOpenApi()
     .AddInfrastructure(builder.Configuration)
     .AddAuth(builder.Configuration)
-    .AddMediator();
+    .AddMediator()
+    .AddOutputCache();
 
 var app = builder.Build();
 
@@ -26,8 +27,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection()
    .UseAuthentication()
    .UseAuthorization()
-   .UseRateLimiter();
+   .UseRateLimiter()
+   .UseOutputCache();
 app.MapAuthEndpoints();
-
+app.MapPatientEndpoints();
 app.Run();
 
