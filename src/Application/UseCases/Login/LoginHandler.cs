@@ -9,6 +9,7 @@ namespace Application.UseCases.Login;
 
 internal class LoginHandler(IUserRepository repository,
     IPatientRepository patientRepository,
+    IPhysicianRepository physicianRepository,
     ITokenService tokenService) : IRequestHandler<LoginCommand, Result<LoginResult>>
 {
     public async Task<Result<LoginResult>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -17,6 +18,7 @@ internal class LoginHandler(IUserRepository repository,
         var userIdRole = user?.Role switch
         {
             UserRole.PATIENT => await patientRepository.GetPatientIdByUserIdAsync(user.Id, cancellationToken),
+            UserRole.PHYSICIAN => await physicianRepository.GetPhysicianIdByUserIdAsync(user.Id, cancellationToken),
             _ => Guid.Empty
         };
         if (user is null || userIdRole is null || !user.CheckPassword(request.Password))
