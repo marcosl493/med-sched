@@ -19,4 +19,14 @@ public class PatientRepository(MedSchedDbContext context) : IPatientRepository
             .Include(patient => patient.User)
             .SingleOrDefaultAsync(patient => patient.Id == id, cancellationToken);
     }
+    public async Task<Guid?> GetPatientIdByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var query = await context
+            .Patients
+            .Include(patient => patient.User)
+            .Select(patient => new { patient.Id, patient.UserId })
+            .AsNoTracking()
+            .SingleOrDefaultAsync(patient => patient.UserId == userId, cancellationToken);
+        return query?.Id;
+    }
 }

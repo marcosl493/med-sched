@@ -1,5 +1,5 @@
-﻿using Application.UseCases.Login;
-using Application.UseCases.Patient;
+﻿using Application.UseCases.Patient;
+using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Extensions;
@@ -15,7 +15,10 @@ public static class PatientEndpoints
         group.MapGet("/{id:guid}", GetByIdAsync)
             .WithName("GetPatientById")
             .Produces<GetPatientResult>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status404NotFound)
+            .RequireAuthorization(nameof(UserRole.PATIENT))
+            .CacheOutput(OutputCacheExtensions.GetByIdPolicyName);
+
         group.MapPost("/", CreatePatient)
             .WithName("CreatePatient")
             .Accepts<CreatePatientCommand>("application/json")

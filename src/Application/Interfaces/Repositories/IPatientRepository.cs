@@ -6,4 +6,5 @@ public interface IPatientRepository
 {
     Task CreatePatientAsync(Patient patient, CancellationToken cancellationToken);
     Task<Patient?> GetPatientByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<Guid?> GetPatientIdByUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }

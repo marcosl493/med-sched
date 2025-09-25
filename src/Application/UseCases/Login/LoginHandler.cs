@@ -1,24 +1,34 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Repositories;
+using Domain.Entities;
 using FluentResults;
 using MediatR;
 using System.ComponentModel;
 
 namespace Application.UseCases.Login;
 
-internal class LoginHandler(IUserRepository repository, ITokenService tokenService) : IRequestHandler<LoginCommand, Result<LoginResult>>
+internal class LoginHandler(IUserRepository repository,
+    IPatientRepository patientRepository,
+    ITokenService tokenService) : IRequestHandler<LoginCommand, Result<LoginResult>>
 {
     public async Task<Result<LoginResult>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await repository.GetUserByEmailAsync(request.Email, cancellationToken);
-        if (user is null || !user.CheckPassword(request.Password))
+        var userIdRole = user?.Role switch
+        {
+            UserRole.PATIENT => await patientRepository.GetPatientIdByUserIdAsync(user.Id, cancellationToken),
+            _ => Guid.Empty
+        };
+        if (user is null || userIdRole is null || !user.CheckPassword(request.Password))
         {
             return Result.Fail<LoginResult>(new Error("Usuário ou senha inválidas.").WithMetadata("StatusCode", 401));
         }
-        var token = tokenService.CreateToken(user.Id, user.Email, user.Role);
+
+        var token = tokenService.CreateToken(userIdRole.Value, user.Email, user.Role);
         return Result.Ok(new LoginResult(token.AccessToken, token.ExpiresIn, token.TokenType));
     }
 }
+
 public record LoginResult([Description("Token de acesso JWT utilizado para autenticação.")] string AccessToken,
     [Description("Tempo de expiração do Token de acesso em Minutos")] ushort ExpiresIn,
     [Description("Tipo de token gerado.")] string TokenType);

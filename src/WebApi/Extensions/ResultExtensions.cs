@@ -6,7 +6,7 @@ public static class ResultExtensions
 {
     public static IResult ToHttpResult<T>(this Result<T> result)
     {
-        if(result.IsSuccess && result.ValueOrDefault is null)
+        if (result.IsSuccess && result.ValueOrDefault is null)
             return Results.NotFound();
 
         if (result.ValueOrDefault is not null)
