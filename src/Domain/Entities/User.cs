@@ -2,13 +2,13 @@
 
 public class User
 {
-    public User(string name, string email, UserRole role, string hashedPassword)
+    public User(string name, string email, UserRole role, string passwordInput)
     {
         Id = Guid.CreateVersion7();
         Name = name;
         Email = email;
         Role = role;
-        HashedPassword = hashedPassword;
+        HashedPassword = BCrypt.Net.BCrypt.HashPassword(passwordInput);
     }
     public User()
     {

@@ -45,6 +45,7 @@ public static class DependencyInjections
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPatientRepository, PatientRepository>();
         return services;
     }
 

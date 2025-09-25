@@ -28,6 +28,6 @@ app.UseHttpsRedirection()
    .UseAuthorization()
    .UseRateLimiter();
 app.MapAuthEndpoints();
-
+app.MapPatientEndpoints();
 app.Run();
 
