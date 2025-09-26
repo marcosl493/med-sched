@@ -17,9 +17,10 @@ public class Patient
         DateOfBirth = dateOfBirth;
         User = new User(name, email, UserRole.PATIENT, password);
     }
-    public ICollection<Appointment> ScheduleAppointment(Guid scheduleId, string reason)
+    public Appointment ScheduleAppointment(Guid scheduleId, string reason)
     {
-        Appointments.Add(new Appointment(reason, AppointmentStatus.SCHEDULED, scheduleId, Id));
-        return Appointments;
+        var newAppointment = new Appointment(reason, scheduleId, Id);
+        Appointments.Add(newAppointment);
+        return newAppointment;
     }
 }
