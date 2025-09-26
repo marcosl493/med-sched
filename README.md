@@ -104,7 +104,7 @@ A API estará disponível em `http://localhost:4000`.
 
 ## 🧪 Testes
 
-Ainda não há testes automatizados implementados, mas recomenda-se utilizar xUnit ou NUnit no futuro.
+O projeto contém testes unitários implementados utilizando a biblioteca MSTest, garantindo a validação das principais funcionalidades da aplicação. Esses testes foram desenvolvidos para assegurar que as regras de negócio essenciais funcionem corretamente e que possíveis regressões sejam rapidamente identificadas durante o desenvolvimento.
 
 ---
 
