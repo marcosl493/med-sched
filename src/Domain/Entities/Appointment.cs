@@ -11,11 +11,11 @@ public class Appointment
     public virtual Schedule Schedule { get; private set; } = null!;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public Appointment(string reason, AppointmentStatus status, Guid scheduleId, Guid patientId)
+    public Appointment(string reason, Guid scheduleId, Guid patientId)
     {
         Id = Guid.CreateVersion7();
         Reason = reason;
-        Status = status;
+        Status = AppointmentStatus.SCHEDULED;
         PatientId = patientId;
         ScheduleId = scheduleId;
         CreatedAt = DateTime.UtcNow;
@@ -25,6 +25,7 @@ public class Appointment
     {
 
     }
+
     public void UpdateStatus(AppointmentStatus newStatus)
     {
         Status = newStatus;
@@ -34,10 +35,6 @@ public class Appointment
 public enum AppointmentStatus
 {
     SCHEDULED = 1,
-    CONFIRMED,
-    COMPLETED,
-    CANCELED,
-    RESCHEDULED,
-    NOSHOW
+    CANCELED
 };
 

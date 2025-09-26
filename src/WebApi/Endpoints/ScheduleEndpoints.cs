@@ -16,6 +16,7 @@ public static class ScheduleEndpoints
             .Produces<GetScheduleResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem()
+            .RequireAuthorization(nameof(UserRole.PATIENT), nameof(UserRole.PHYSICIAN))   
             .WithDescription("Consulta pelo Id um horário de atendimento cadastrado.");
 
         group.MapGet("/", GetAllAvaliableScheduleAsync)
@@ -24,7 +25,7 @@ public static class ScheduleEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
             .RequireAuthorization(nameof(UserRole.PATIENT))
-            .WithDescription("Consulta todas horários disponíveis para agendamento, com seus respectivos médicos e especialidade.");
+            .WithDescription("Consulta todos os horários disponíveis para agendamento, com seus respectivos médicos e especialidade.");
     }
     private static async Task<IResult> GetScheduleByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
