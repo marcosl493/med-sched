@@ -18,15 +18,14 @@ internal class CreateAppointmentHandler(IAppointmentRepository appointmentReposi
         var patient = await patientRepository.GetPatientByIdAsync(request.PatientId, cancellationToken);
         if (patient is null)
             return Result.Fail(new Error("Paciente não encontrado"));
-        using var scope = new TransactionScope(TransactionScopeOption.Required,transactionOptions, TransactionScopeAsyncFlowOption.Enabled);
+        using var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled);
         var isAvaliableAppointment = await appointmentRepository.IsAvaliableAppointmentAsync(request.ScheduleId, cancellationToken);
         if (!isAvaliableAppointment)
             return Result.Fail(new Error("Agendamento para esse horário não disponível.")
                 .WithMetadata("StatusCode", 409));
-        
+
         var appointment = patient.ScheduleAppointment(request.ScheduleId, request.Reason);
         await appointmentRepository.CreateAppointmentAsync(appointment, cancellationToken);
-        //await patientRepository.UpdatePatientAsync(patient, cancellationToken);
         scope.Complete();
 
         var response = new CreateAppointmentResponse(appointment.Id, appointment.PatientId, appointment.CreatedAt);

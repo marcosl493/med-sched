@@ -14,6 +14,7 @@ internal class GetAllAvaliableScheduleHandler(IScheduleRepository repository) : 
             new GetScheduleResponse
             (
                 sched.Id,
+                sched.IsAvaliableSchedule(),
                 sched.StartTime,
                 sched.EndTime,
                 new PhysicianDto

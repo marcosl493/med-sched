@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.Patient;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 using WebApi.Extensions;
 
 namespace WebApi.Endpoints;
@@ -15,7 +15,7 @@ public static class AppointmentEndpoints
             .WithName(nameof(GetAppointmentByIdAsync))
             .Produces<GetPatientResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
-            .RequireAuthorization(nameof(UserRole.PATIENT))
+            .RequireAuthorization(Policies.Patient)
             .WithDescription("Consulta agendamento de atendimento pelo Id.");
 
     }

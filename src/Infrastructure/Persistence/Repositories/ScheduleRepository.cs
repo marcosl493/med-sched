@@ -29,7 +29,7 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
 
         return query
             .Take(top)
-            .Select(sched => new Schedule(sched.Id, sched.Physician, sched.CreatedAt, sched.StartTime, sched.EndTime))
+            .Select(sched => new Schedule(sched.Id, sched.Appointments, sched.Physician, sched.CreatedAt, sched.StartTime, sched.EndTime))
             .AsNoTracking()
             .ToArrayAsync(cancellationToken);
     }
@@ -38,8 +38,10 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
         => context.Schedules
                   .Include(sched => sched.Physician)
                     .ThenInclude(physician => physician.User)
+                  .Include(sched => sched.Appointments)
                   .Where(sched => sched.Id == id)
-                  .Select(sched => new Schedule(sched.Id, sched.Physician, sched.CreatedAt, sched.StartTime, sched.EndTime))
+                  .Select(sched => new Schedule(sched.Id, sched.Appointments, sched.Physician, sched.CreatedAt, sched.StartTime, sched.EndTime))
+                  .AsNoTracking()
                   .FirstOrDefaultAsync(cancellationToken);
 
     public Task<bool> IsAvailableScheduleByPhysicianIdAsync(Guid physicianId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)

@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.Schedule;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 using WebApi.Extensions;
 
 namespace WebApi.Endpoints;
@@ -16,7 +16,7 @@ public static class ScheduleEndpoints
             .Produces<GetScheduleResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem()
-            .RequireAuthorization(nameof(UserRole.PATIENT), nameof(UserRole.PHYSICIAN))   
+            .RequireAuthorization(Policies.Patient)
             .WithDescription("Consulta pelo Id um horário de atendimento cadastrado.");
 
         group.MapGet("/", GetAllAvaliableScheduleAsync)
@@ -24,7 +24,7 @@ public static class ScheduleEndpoints
             .Produces<IEnumerable<GetScheduleResponse>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
-            .RequireAuthorization(nameof(UserRole.PATIENT))
+            .RequireAuthorization(Policies.Patient)
             .WithDescription("Consulta todos os horários disponíveis para agendamento, com seus respectivos médicos e especialidade.");
     }
     private static async Task<IResult> GetScheduleByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)

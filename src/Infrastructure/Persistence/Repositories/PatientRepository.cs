@@ -31,7 +31,7 @@ public class PatientRepository(MedSchedDbContext context) : IPatientRepository
     }
 
     public Task UpdatePatientAsync(Patient patient, CancellationToken cancellationToken)
-    { 
+    {
         context.Patients.Update(patient);
         return context.SaveChangesAsync(cancellationToken);
     }

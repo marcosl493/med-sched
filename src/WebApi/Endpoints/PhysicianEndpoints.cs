@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.Schedule;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Authorization;
 using WebApi.Dtos;
 using WebApi.Extensions;
 
@@ -17,7 +17,7 @@ public static class PhysicianEndpoints
             .Accepts<CreateScheduleCommand>("application/json")
             .Produces<CreateScheduleResponse>(StatusCodes.Status201Created)
             .ProducesValidationProblem()
-            .RequireAuthorization(nameof(UserRole.PHYSICIAN))
+            .RequireAuthorization(Policies.PhysicianSameUser)
             .WithDescription("Cria um horário disponível para um médico.");
 
         group.MapPut("/{id:guid}/schedules/{scheduleId:guid}", UpdateSchedule)
@@ -26,7 +26,7 @@ public static class PhysicianEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .ProducesValidationProblem()
-            .RequireAuthorization(nameof(UserRole.PHYSICIAN))
+            .RequireAuthorization(Policies.PhysicianSameUser)
             .WithDescription("Atualiza um horário disponível para um médico.");
 
     }
