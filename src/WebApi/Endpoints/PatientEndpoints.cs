@@ -17,13 +17,15 @@ public static class PatientEndpoints
             .Produces<GetPatientResult>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .RequireAuthorization(nameof(UserRole.PATIENT))
-            .CacheOutput(OutputCacheExtensions.GetByIdPolicyName);
+            .CacheOutput(OutputCacheExtensions.GetByIdPolicyName)
+            .WithDescription("Consulta pelo Id os dados do paciente.");
 
         group.MapPost("/", CreatePatient)
             .WithName("CreatePatient")
             .Accepts<CreatePatientCommand>("application/json")
             .Produces<CreatePatientResult>(StatusCodes.Status201Created)
-            .ProducesValidationProblem();
+            .ProducesValidationProblem()
+            .WithDescription("Cria um paciente com seus dados, e usuário de login.");
     }
     private static async Task<IResult> CreatePatient([FromBody]CreatePatientCommand request, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {

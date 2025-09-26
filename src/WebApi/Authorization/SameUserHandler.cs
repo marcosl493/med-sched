@@ -14,16 +14,16 @@ public class SameUserHandler : AuthorizationHandler<SameUserRequirement>
         if (userIdClaim is null) return Task.CompletedTask;
 
         var httpContext = (context.Resource as HttpContext)!;
-        if (httpContext.Request.RouteValues.TryGetValue("id", out var routeIdObj) &&
-            Guid.TryParse(routeIdObj?.ToString(), out var routeId))
-        {
-            if (Guid.Parse(userIdClaim.Value) == routeId)
-            {
-                context.Succeed(requirement);
-            }
-        }
+        var isGetById = httpContext.Request.RouteValues.TryGetValue("id", out var routeIdObj);
+        if (!isGetById)
+            context.Succeed(requirement);
 
-        return Task.CompletedTask;
+        if (Guid.TryParse(routeIdObj?.ToString(), out var routeId) &&
+            Guid.Parse(userIdClaim.Value) == routeId)
+        {
+            context.Succeed(requirement);
+        }
+         return Task.CompletedTask;
     }
 }
 
