@@ -1,16 +1,33 @@
 services:
-  postgres:
+  db:
     image: postgres
+    container_name: medsched-postgres
+    restart: always
+    volumes:
+      - ../scripts:/docker-entrypoint-initdb.d/:ro
     environment:
       POSTGRES_PASSWORD: ""
+      POSTGRES_USER: "postgres"
+      POSTGRES_DB: "MedSched"
     ports:
-      - "5432:5432"
+      - "5433:5432"
   webapi:
     image: ${DOCKER_REGISTRY-}webapi
+    container_name: medsched-webapi
+    ports:
+      - "4000:8080" 
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_HTTP_PORTS: 8080
+      DOTNET_ENVIRONMENT: "Staging"
       DB_USERNAME: "postgres"
       DB_PASSWORD: ""
+      ASPNETCORE_Kestrel__Certificates__Default__Path: ""
+      Jwt__Audience: "med-sched.users"
+      Jwt__ExpiresInMinutes: 15
+      Jwt__IssuerJwt__Issuer: "med-sched.webapi"
+      Jwt__SecretKey: ""
     build:
       context: .
       dockerfile: WebApi/Dockerfile
+    depends_on:
+     - db
