@@ -29,7 +29,10 @@ app.UseHttpsRedirection()
    .UseAuthorization()
    .UseRateLimiter()
    .UseOutputCache();
+
 app.MapAuthEndpoints();
 app.MapPatientEndpoints();
+app.MapPhysicianEndpoints();
+app.MapScheduleEndpoints();
 app.Run();
 
