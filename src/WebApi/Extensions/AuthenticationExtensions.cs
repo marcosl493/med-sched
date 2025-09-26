@@ -44,20 +44,35 @@ public static class AuthenticationExtensions
 
         services.AddSingleton<IAuthorizationHandler, SameUserHandler>();
         services.AddAuthorizationBuilder()
-            .AddPolicy(nameof(UserRole.PHYSICIAN), policy =>
+            .AddPolicy(Policies.Physician, policy =>
+            {
+                policy.RequireClaim("iss", jwtOptions.Issuer);
+                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole(nameof(UserRole.PHYSICIAN));
+            })
+            .AddPolicy(Policies.PhysicianSameUser, policy =>
             {
                 policy.RequireClaim("iss", jwtOptions.Issuer);
                 policy.RequireClaim("aud", jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PHYSICIAN));
                 policy.AddRequirements(new SameUserRequirement());
-            }).AddPolicy(nameof(UserRole.PATIENT), policy =>
+            })
+            .AddPolicy(Policies.PatientSameUser, policy =>
             {
                 policy.RequireClaim("iss", jwtOptions.Issuer);
                 policy.RequireClaim("aud", jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PATIENT));
                 policy.AddRequirements(new SameUserRequirement());
+            })
+            .AddPolicy(Policies.Patient, policy =>
+            {
+                policy.RequireClaim("iss", jwtOptions.Issuer);
+                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireAuthenticatedUser();
+                policy.RequireRole(nameof(UserRole.PATIENT));
             });
 
         services.AddRateLimiter(options =>

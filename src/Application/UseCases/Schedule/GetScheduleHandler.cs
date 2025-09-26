@@ -20,6 +20,7 @@ internal class GetScheduleHandler(IScheduleRepository repository) : IRequestHand
             );
         var response = new GetScheduleResponse(
             schedule.Id,
+            schedule.IsAvaliableSchedule(),
             schedule.StartTime,
             schedule.EndTime,
             physicianDto
@@ -30,6 +31,7 @@ internal class GetScheduleHandler(IScheduleRepository repository) : IRequestHand
 
 public record GetScheduleResponse(
     Guid Id,
+    bool IsAvaliable,
     DateTime StartTime,
     DateTime EndTime,
     PhysicianDto Physician

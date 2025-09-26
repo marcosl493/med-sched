@@ -29,4 +29,10 @@ public class PatientRepository(MedSchedDbContext context) : IPatientRepository
             .SingleOrDefaultAsync(patient => patient.UserId == userId, cancellationToken);
         return query?.Id;
     }
+
+    public Task UpdatePatientAsync(Patient patient, CancellationToken cancellationToken)
+    {
+        context.Patients.Update(patient);
+        return context.SaveChangesAsync(cancellationToken);
+    }
 }
