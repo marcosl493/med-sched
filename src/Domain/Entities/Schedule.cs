@@ -18,6 +18,11 @@ public class Schedule
         EndTime = endTime;
         Id = id;
     }
+    public void Update(DateTime startTime, DateTime endTime)
+    {
+        StartTime = startTime;
+        EndTime = endTime;
+    }
     public Schedule()
     {
 

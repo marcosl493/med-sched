@@ -10,7 +10,7 @@ internal class GetAllAvaliableScheduleHandler(IScheduleRepository repository) : 
     {
         var result = await repository.GetAllAvaliableScheduleAsync(request.PhysicianId, request.StartTime, request.Top.GetValueOrDefault(), request.Skip, cancellationToken);
         var response = result
-            .Select(sched => 
+            .Select(sched =>
             new GetScheduleResponse
             (
                 sched.Id,

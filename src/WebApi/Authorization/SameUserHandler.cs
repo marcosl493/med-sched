@@ -23,7 +23,7 @@ public class SameUserHandler : AuthorizationHandler<SameUserRequirement>
         {
             context.Succeed(requirement);
         }
-         return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }
 

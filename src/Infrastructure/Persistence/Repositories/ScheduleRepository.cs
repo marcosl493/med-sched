@@ -24,7 +24,7 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
 
         if (physicianId.HasValue)
             query = query.Where(sched => sched.PhysicianId == physicianId);
-        if(skip.HasValue)
+        if (skip.HasValue)
             query = query.Skip(skip.Value);
 
         return query
@@ -49,4 +49,9 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
                                      ((sched.StartTime < endTime && sched.EndTime > startTime) ||
                                       (sched.StartTime >= startTime && sched.EndTime <= endTime)),
                               cancellationToken);
+    public Task UpdateScheduleAsync(Schedule schedule, CancellationToken cancellationToken)
+    {
+        context.Schedules.Update(schedule);
+        return context.SaveChangesAsync(cancellationToken);
+    }
 }

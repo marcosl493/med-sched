@@ -32,11 +32,11 @@ public static class ScheduleEndpoints
         return result.ToHttpResult();
     }
     private static async Task<IResult> GetAllAvaliableScheduleAsync
-        ([FromQuery]Guid? physicianId,
+        ([FromQuery] Guid? physicianId,
          [FromQuery] int? skip,
          [FromServices] IMediator mediator,
          CancellationToken cancellationToken,
-         [FromQuery]DateTime? startTime = default,
+         [FromQuery] DateTime? startTime = default,
          [FromQuery] int top = 50)
     {
         var result = await mediator.Send(new GetAllAvaliableScheduleQuery(physicianId, startTime, skip, top), cancellationToken);

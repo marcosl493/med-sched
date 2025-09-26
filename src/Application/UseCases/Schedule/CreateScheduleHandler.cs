@@ -8,7 +8,7 @@ internal class CreateScheduleHandler(IScheduleRepository repository) : IRequestH
 {
     public async Task<Result<CreateScheduleResponse>> Handle(CreateScheduleCommand request, CancellationToken cancellationToken)
     {
-        if(request.EndTime <= request.StartTime)
+        if (request.EndTime <= request.StartTime)
         {
             return Result.Fail<CreateScheduleResponse>("EndTime must be greater than StartTime");
         }
