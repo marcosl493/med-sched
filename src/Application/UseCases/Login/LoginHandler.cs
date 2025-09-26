@@ -23,7 +23,7 @@ public class LoginHandler(IUserRepository repository,
         };
         if (user is null || userIdRole == Guid.Empty || !user.CheckPassword(request.Password))
         {
-            return Result.Fail<LoginResult>(new Error("Usuário ou senha inválidas.").WithMetadata("StatusCode", 401));
+            return Result.Fail<LoginResult>(new Error("user or password invalid.").WithMetadata("StatusCode", 401));
         }
 
         var token = tokenService.CreateToken(userIdRole.Value, user.Email, user.Role);

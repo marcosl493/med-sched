@@ -10,11 +10,11 @@ public class UpdateScheduleHandler(IScheduleRepository repository) : IRequestHan
     {
         var schedule = await repository.GetScheduleByIdAsync(request.Id, cancellationToken);
         if (schedule is null)
-            return Result.Fail(new Error("Recurso não encontrado.")
+            return Result.Fail(new Error("Schedule not found.")
                 .WithMetadata("StatusCode", 404));
 
         if (schedule.PhysicianId != request.PhysicianId)
-            return Result.Fail(new Error("Recurso não autorizado")
+            return Result.Fail(new Error("Schedule not found.")
                 .WithMetadata("StatusCode", 403));
 
         schedule.Update(request.StartTime, request.EndTime);

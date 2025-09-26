@@ -17,11 +17,11 @@ public class CreateAppointmentHandler(IAppointmentRepository appointmentReposito
     {
         var patient = await patientRepository.GetPatientByIdAsync(request.PatientId, cancellationToken);
         if (patient is null)
-            return Result.Fail(new Error("Paciente não encontrado"));
+            return Result.Fail(new Error("Patient not fount"));
         using var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled);
         var isAvaliableAppointment = await appointmentRepository.IsAvaliableAppointmentAsync(request.ScheduleId, cancellationToken);
         if (!isAvaliableAppointment)
-            return Result.Fail(new Error("Agendamento para esse horário não disponível.")
+            return Result.Fail(new Error("Invaliable Schedule.")
                 .WithMetadata("StatusCode", 409));
 
         var appointment = patient.ScheduleAppointment(request.ScheduleId, request.Reason);
