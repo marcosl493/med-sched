@@ -1,0 +1,17 @@
+services:
+  webapi:
+    environment:
+      - DOTNET_ENVIRONMENT=Staging
+      - ASPNETCORE_HTTP_PORTS=8080
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+      - DOTNET_GENERATE_ASPNET_CERTIFICATE=false
+      - DOTNET_HOST_PATH=/usr/share/dotnet 
+    ports:
+      - "8080"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
