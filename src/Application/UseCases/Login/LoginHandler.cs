@@ -7,7 +7,7 @@ using System.ComponentModel;
 
 namespace Application.UseCases.Login;
 
-internal class LoginHandler(IUserRepository repository,
+public class LoginHandler(IUserRepository repository,
     IPatientRepository patientRepository,
     IPhysicianRepository physicianRepository,
     ITokenService tokenService) : IRequestHandler<LoginCommand, Result<LoginResult>>
@@ -21,7 +21,7 @@ internal class LoginHandler(IUserRepository repository,
             UserRole.PHYSICIAN => await physicianRepository.GetPhysicianIdByUserIdAsync(user.Id, cancellationToken),
             _ => Guid.Empty
         };
-        if (user is null || userIdRole is null || !user.CheckPassword(request.Password))
+        if (user is null || userIdRole == Guid.Empty || !user.CheckPassword(request.Password))
         {
             return Result.Fail<LoginResult>(new Error("Usuário ou senha inválidas.").WithMetadata("StatusCode", 401));
         }

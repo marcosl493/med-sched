@@ -18,6 +18,7 @@ public class Schedule
         EndTime = endTime;
         Id = id;
         Appointments = appointments;
+        PhysicianId = physician.Id;
     }
     public void Update(DateTime startTime, DateTime endTime)
     {

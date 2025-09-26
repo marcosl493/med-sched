@@ -4,7 +4,7 @@ using WebApi.Endpoints;
 using WebApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
-if(builder.Environment.EnvironmentName == "Staging")
+if (builder.Environment.EnvironmentName == "Staging")
     builder.WebHost.ConfigureKestrel(opt =>
     {
         opt.ListenAnyIP(8080);

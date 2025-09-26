@@ -17,7 +17,7 @@ public class Patient
         DateOfBirth = dateOfBirth;
         User = new User(name, email, UserRole.PATIENT, password);
     }
-    public Appointment ScheduleAppointment(Guid scheduleId, string reason)
+    public virtual Appointment ScheduleAppointment(Guid scheduleId, string reason)
     {
         var newAppointment = new Appointment(reason, scheduleId, Id);
         Appointments.Add(newAppointment);

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.UseCases.Schedule;
 
-internal class UpdateScheduleHandler(IScheduleRepository repository) : IRequestHandler<UpdateScheduleCommand, Result>
+public class UpdateScheduleHandler(IScheduleRepository repository) : IRequestHandler<UpdateScheduleCommand, Result>
 {
     public async Task<Result> Handle(UpdateScheduleCommand request, CancellationToken cancellationToken)
     {
@@ -13,7 +13,7 @@ internal class UpdateScheduleHandler(IScheduleRepository repository) : IRequestH
             return Result.Fail(new Error("Recurso não encontrado.")
                 .WithMetadata("StatusCode", 404));
 
-        if (schedule.Physician.Id != request.PhysicianId)
+        if (schedule.PhysicianId != request.PhysicianId)
             return Result.Fail(new Error("Recurso não autorizado")
                 .WithMetadata("StatusCode", 403));
 

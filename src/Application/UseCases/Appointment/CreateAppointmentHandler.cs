@@ -5,7 +5,7 @@ using System.Transactions;
 
 namespace Application.UseCases.Appointment;
 
-internal class CreateAppointmentHandler(IAppointmentRepository appointmentRepository,
+public class CreateAppointmentHandler(IAppointmentRepository appointmentRepository,
     IPatientRepository patientRepository) : IRequestHandler<CreateAppointmentCommand, Result<CreateAppointmentResponse>>
 {
     private static readonly TransactionOptions transactionOptions = new()

@@ -3,7 +3,7 @@ using FluentResults;
 using MediatR;
 namespace Application.UseCases.Patient;
 
-internal class CreatePatientHandler(IPatientRepository patientRepository) : IRequestHandler<CreatePatientCommand, Result<CreatePatientResult>>
+public class CreatePatientHandler(IPatientRepository patientRepository) : IRequestHandler<CreatePatientCommand, Result<CreatePatientResult>>
 {
     public async Task<Result<CreatePatientResult>> Handle(CreatePatientCommand request, CancellationToken cancellationToken)
     {

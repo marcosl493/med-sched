@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.UseCases.Schedule;
 
-internal class CreateScheduleHandler(IScheduleRepository repository) : IRequestHandler<CreateScheduleCommand, Result<CreateScheduleResponse>>
+public class CreateScheduleHandler(IScheduleRepository repository) : IRequestHandler<CreateScheduleCommand, Result<CreateScheduleResponse>>
 {
     public async Task<Result<CreateScheduleResponse>> Handle(CreateScheduleCommand request, CancellationToken cancellationToken)
     {
