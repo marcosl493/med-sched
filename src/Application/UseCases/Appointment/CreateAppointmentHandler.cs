@@ -17,7 +17,7 @@ public class CreateAppointmentHandler(IAppointmentRepository appointmentReposito
     {
         var patient = await patientRepository.GetPatientByIdAsync(request.PatientId, cancellationToken);
         if (patient is null)
-            return Result.Fail(new Error("Patient not fount"));
+            return Result.Fail(new Error("Patient not found."));
         using var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled);
         var isAvaliableAppointment = await appointmentRepository.IsAvaliableAppointmentAsync(request.ScheduleId, cancellationToken);
         if (!isAvaliableAppointment)

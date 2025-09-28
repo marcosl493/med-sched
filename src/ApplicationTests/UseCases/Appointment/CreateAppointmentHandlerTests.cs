@@ -36,7 +36,7 @@ public class CreateAppointmentHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         Assert.IsTrue(result.IsFailed);
-        Assert.AreEqual("Paciente não encontrado", result.Errors[0].Message);
+        Assert.AreEqual("Patient not found.", result.Errors[0].Message);
     }
 
     [TestMethod]
@@ -56,7 +56,7 @@ public class CreateAppointmentHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         Assert.IsTrue(result.IsFailed);
-        Assert.AreEqual("Agendamento para esse horário não disponível.", result.Errors[0].Message);
+        Assert.AreEqual("Invaliable Schedule.", result.Errors[0].Message);
         Assert.AreEqual(409, result.Errors[0].Metadata["StatusCode"]);
     }
 
