@@ -29,7 +29,7 @@ public class UpdateScheduleHandlerTests
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
-        Assert.AreEqual("Recurso não encontrado.", result.Errors[0].Message);
+        Assert.AreEqual("Schedule not found.", result.Errors[0].Message);
         Assert.AreEqual(404, result.Errors[0].Metadata["StatusCode"]);
     }
 
@@ -47,7 +47,7 @@ public class UpdateScheduleHandlerTests
 
         // Assert
         Assert.IsFalse(result.IsSuccess);
-        Assert.AreEqual("Recurso não autorizado", result.Errors[0].Message);
+        Assert.AreEqual("Schedule not found.", result.Errors[0].Message);
         Assert.AreEqual(403, result.Errors[0].Metadata["StatusCode"]);
     }
 
