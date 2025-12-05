@@ -8,19 +8,21 @@ public class CreateScheduleHandler(IScheduleRepository repository) : IRequestHan
 {
     public async Task<Result<CreateScheduleResponse>> Handle(CreateScheduleCommand request, CancellationToken cancellationToken)
     {
+        var startTimeUtc = request.StartTime.ToUniversalTime();
+        var endTimeUtc = request.EndTime.ToUniversalTime();
         if (request.EndTime <= request.StartTime)
         {
             return Result.Fail<CreateScheduleResponse>("EndTime must be greater than StartTime");
         }
-        if (await repository.IsAvailableScheduleByPhysicianIdAsync(request.PhysicianId, request.StartTime, request.EndTime, cancellationToken))
+        if (await repository.IsAvailableScheduleByPhysicianIdAsync(request.PhysicianId, startTimeUtc, endTimeUtc, cancellationToken))
         {
             return Result.Fail<CreateScheduleResponse>("There is already a schedule for this physician in the given time range.");
         }
         var schedule = new Domain.Entities.Schedule
         (
            request.PhysicianId,
-           request.StartTime,
-           request.EndTime
+           startTimeUtc,
+           endTimeUtc
         );
         await repository.CreateScheduleAsync(schedule, cancellationToken);
         return Result.Ok(new CreateScheduleResponse(

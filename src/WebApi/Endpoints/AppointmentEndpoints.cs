@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Patient;
+﻿using Application.UseCases.Appointment;
+using Application.UseCases.Patient;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Authorization;
@@ -13,7 +14,7 @@ public static class AppointmentEndpoints
         var group = app.MapGroup("/api/appointments").WithTags("Appointments");
         group.MapGet("/{id:guid}", GetAppointmentByIdAsync)
             .WithName(nameof(GetAppointmentByIdAsync))
-            .Produces<GetPatientResult>(StatusCodes.Status200OK)
+            .Produces<GetAppointmentResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .RequireAuthorization(Policies.Patient)
             .WithDescription("Consulta agendamento de atendimento pelo Id.");
@@ -21,7 +22,7 @@ public static class AppointmentEndpoints
     }
     private static async Task<IResult> GetAppointmentByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
-        var result = await mediator.Send(new GetPatientByIdQuery(id), cancellationToken);
+        var result = await mediator.Send(new GetAppointmentQuery(id), cancellationToken);
         return result.ToHttpResult();
     }
 }
