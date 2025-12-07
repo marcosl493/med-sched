@@ -3,7 +3,7 @@
 public class Patient
 {
     public Guid Id { get; private set; }
-    public DateTime DateOfBirth { get; private set; }
+    public DateTimeOffset DateOfBirth { get; private set; }
     public virtual User User { get; private set; } = null!;
     public Guid UserId { get; private set; }
     public virtual ICollection<Appointment> Appointments { get; private set; } = [];

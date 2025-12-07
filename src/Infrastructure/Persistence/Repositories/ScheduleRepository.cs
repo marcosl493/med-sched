@@ -12,22 +12,24 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public Task<Schedule[]> GetAllAvaliableScheduleAsync(Guid? physicianId, DateTime? startTime, int top, int? skip, CancellationToken cancellationToken)
+    public Task<Schedule[]> GetAllScheduleAsync(Guid? physicianId, DateTimeOffset? startTime, bool? onlyAvaliable, int top, int? skip, CancellationToken cancellationToken)
     {
         var query = context.Schedules
                             .Include(sched => sched.Physician)
                                 .ThenInclude(physician => physician.User)
                             .Include(sched => sched.Appointments)
-                            .Where(sched => sched.StartTime > (startTime ?? DateTimeOffset.UtcNow)
-                                    && !sched.Appointments
-                                            .Any(appointment => appointment.Status == AppointmentStatus.SCHEDULED));
+                            .OrderByDescending(sched => sched.StartTime)
+                            .Where(sched => sched.StartTime > (startTime ?? DateTimeOffset.UtcNow));
 
+        if(onlyAvaliable.HasValue)
+            query = query.Where(sched => !sched.Appointments.Any(appointment => appointment.Status == AppointmentStatus.SCHEDULED));
         if (physicianId.HasValue)
             query = query.Where(sched => sched.PhysicianId == physicianId);
         if (skip.HasValue)
             query = query.Skip(skip.Value);
 
         return query
+            
             .Take(top)
             .Select(sched => new Schedule(sched.Id, sched.Appointments, sched.Physician, sched.CreatedAt, sched.StartTime, sched.EndTime))
             .AsNoTracking()
@@ -44,7 +46,7 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
                   .AsNoTracking()
                   .FirstOrDefaultAsync(cancellationToken);
 
-    public Task<bool> IsAvailableScheduleByPhysicianIdAsync(Guid physicianId, DateTime startTime, DateTime endTime, CancellationToken cancellationToken)
+    public Task<bool> IsAvailableScheduleByPhysicianIdAsync(Guid physicianId, DateTimeOffset startTime, DateTimeOffset endTime, CancellationToken cancellationToken)
 
         => context.Schedules
                   .AnyAsync(sched => sched.PhysicianId == physicianId &&

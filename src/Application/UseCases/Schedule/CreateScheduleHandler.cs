@@ -35,10 +35,10 @@ public class CreateScheduleHandler(IScheduleRepository repository) : IRequestHan
 }
 
 public record CreateScheduleResponse(Guid Id, Guid PhysicianId,
-    DateTime StartTime,
-    DateTime EndTime);
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime);
 
 public record CreateScheduleCommand(
     Guid PhysicianId,
-    DateTime StartTime,
-    DateTime EndTime) : IRequest<Result<CreateScheduleResponse>>;
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime) : IRequest<Result<CreateScheduleResponse>>;

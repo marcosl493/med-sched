@@ -35,4 +35,4 @@ public class CreateAppointmentHandler(IAppointmentRepository appointmentReposito
 
 public record CreateAppointmentCommand(Guid PatientId, Guid ScheduleId, string Reason) : IRequest<Result<CreateAppointmentResponse>>;
 
-public record CreateAppointmentResponse(Guid Id, Guid PatientId, DateTime CreatedAt);
+public record CreateAppointmentResponse(Guid Id, Guid PatientId, DateTimeOffset CreatedAt);

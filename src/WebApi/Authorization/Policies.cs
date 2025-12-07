@@ -5,5 +5,6 @@ public static class Policies
     public const string PatientSameUser = "PatientSameUserPolicy";
     public const string Patient = "PatientPolicy";
     public const string Physician = "PhysicianPolicy";
+    public const string PhysicianSameUserOrPatient = "PhysicianSameUserOrPatient";
 }
 

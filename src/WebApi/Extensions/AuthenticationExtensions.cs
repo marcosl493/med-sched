@@ -3,9 +3,11 @@ using Domain.Entities;
 using Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading.RateLimiting;
 using WebApi.Authorization;
@@ -53,28 +55,34 @@ public static class AuthenticationExtensions
             })
             .AddPolicy(Policies.PhysicianSameUser, policy =>
             {
-                policy.RequireClaim("iss", jwtOptions.Issuer);
-                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireClaim(JwtRegisteredClaimNames.Iss, jwtOptions.Issuer);
+                policy.RequireClaim(JwtRegisteredClaimNames.Aud, jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PHYSICIAN));
                 policy.AddRequirements(new SameUserRequirement());
             })
             .AddPolicy(Policies.PatientSameUser, policy =>
             {
-                policy.RequireClaim("iss", jwtOptions.Issuer);
-                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireClaim(JwtRegisteredClaimNames.Iss, jwtOptions.Issuer);
+                policy.RequireClaim(JwtRegisteredClaimNames.Aud, jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PATIENT));
                 policy.AddRequirements(new SameUserRequirement());
             })
             .AddPolicy(Policies.Patient, policy =>
             {
-                policy.RequireClaim("iss", jwtOptions.Issuer);
-                policy.RequireClaim("aud", jwtOptions.Audience);
+                policy.RequireClaim(JwtRegisteredClaimNames.Iss, jwtOptions.Issuer);
+                policy.RequireClaim(JwtRegisteredClaimNames.Aud, jwtOptions.Audience);
                 policy.RequireAuthenticatedUser();
                 policy.RequireRole(nameof(UserRole.PATIENT));
-            });
-
+            })
+             .AddPolicy(Policies.PhysicianSameUserOrPatient, policy =>
+             {
+                 policy.RequireClaim(JwtRegisteredClaimNames.Iss, jwtOptions.Issuer);
+                 policy.RequireClaim(JwtRegisteredClaimNames.Aud, jwtOptions.Audience);
+                 policy.RequireAuthenticatedUser();
+                 policy.RequireAssertion(context => ValidateCompositeUserAccess(context));
+             });
         services.AddRateLimiter(options =>
         {
             var rateLimitConfig = configuration.GetSection(AuthenticationRateLimitOptions.SectionName)
@@ -89,5 +97,35 @@ public static class AuthenticationExtensions
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
         return services;
+    }
+    private static bool ValidateCompositeUserAccess(AuthorizationHandlerContext context)
+    {
+        var user = context.User;
+
+        var isPatient = user.IsInRole(nameof(UserRole.PATIENT));
+
+        if (isPatient)
+            return true;
+
+        var isPhysician = user.IsInRole(nameof(UserRole.PHYSICIAN));
+
+        if (!isPhysician)
+            return false;
+
+        var httpContext = context.Resource as HttpContext;
+        var routeId = httpContext?.GetRouteValue("id")?.ToString();
+
+        var queryId = httpContext?.Request.Query["physicianId"].FirstOrDefault();
+
+        var fetchedId = !string.IsNullOrWhiteSpace(routeId)
+            ? routeId
+            : queryId;
+
+        if (string.IsNullOrWhiteSpace(fetchedId))
+            return true;
+
+        var userIdClaim = context.User.Claims.FirstOrDefault(claim => claim.Properties.Values.Contains(JwtRegisteredClaimNames.Sub));
+
+        return fetchedId == userIdClaim?.Value;
     }
 }

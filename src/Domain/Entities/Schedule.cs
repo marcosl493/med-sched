@@ -2,7 +2,7 @@
 
 public class Schedule
 {
-    public Schedule(Guid physicianId, DateTime startTime, DateTime endTime)
+    public Schedule(Guid physicianId, DateTimeOffset startTime, DateTimeOffset endTime)
     {
         Id = Guid.CreateVersion7();
         PhysicianId = physicianId;
@@ -10,7 +10,7 @@ public class Schedule
         StartTime = startTime;
         EndTime = endTime;
     }
-    public Schedule(Guid id, ICollection<Appointment> appointments, Physician physician, DateTime createdAt, DateTime startTime, DateTime endTime)
+    public Schedule(Guid id, ICollection<Appointment> appointments, Physician physician, DateTimeOffset createdAt, DateTimeOffset startTime, DateTimeOffset endTime)
     {
         Physician = physician;
         CreatedAt = createdAt;
@@ -35,7 +35,7 @@ public class Schedule
     public Guid PhysicianId { get; private set; }
     public virtual Physician Physician { get; private set; } = null!;
     public virtual ICollection<Appointment> Appointments { get; private set; } = [];
-    public DateTime StartTime { get; private set; }
-    public DateTime EndTime { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+    public DateTimeOffset StartTime { get; private set; }
+    public DateTimeOffset EndTime { get; private set; }
+    public DateTimeOffset CreatedAt { get; private set; }
 }

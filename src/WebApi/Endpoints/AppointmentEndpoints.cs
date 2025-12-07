@@ -16,7 +16,7 @@ public static class AppointmentEndpoints
             .WithName(nameof(GetAppointmentByIdAsync))
             .Produces<GetAppointmentResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
-            .RequireAuthorization(Policies.Patient)
+            .RequireAuthorization(Policies.Patient, Policies.Physician)
             .WithDescription("Consulta agendamento de atendimento pelo Id.");
 
     }

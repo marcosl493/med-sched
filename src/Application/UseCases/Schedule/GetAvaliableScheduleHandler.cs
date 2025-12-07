@@ -1,14 +1,16 @@
 ﻿using Application.Interfaces.Repositories;
+using Domain.Entities;
 using FluentResults;
 using MediatR;
+using System;
 
 namespace Application.UseCases.Schedule;
 
-internal class GetAllAvaliableScheduleHandler(IScheduleRepository repository) : IRequestHandler<GetAllAvaliableScheduleQuery, Result<IEnumerable<GetScheduleResponse>>>
+internal class GetAvaliableScheduleHandler(IScheduleRepository repository) : IRequestHandler<GetAllScheduleQuery, Result<IEnumerable<GetScheduleResponse>>>
 {
-    public async Task<Result<IEnumerable<GetScheduleResponse>>> Handle(GetAllAvaliableScheduleQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<GetScheduleResponse>>> Handle(GetAllScheduleQuery request, CancellationToken cancellationToken)
     {
-        var result = await repository.GetAllAvaliableScheduleAsync(request.PhysicianId, request.StartTime, request.Top.GetValueOrDefault(), request.Skip, cancellationToken);
+        var result = await repository.GetAllScheduleAsync(request.PhysicianId, request.StartTime?.ToUniversalTime(), request.OnlyAvaliable, request.Top.GetValueOrDefault(), request.Skip, cancellationToken);
         var response = result
             .Select(sched =>
             new GetScheduleResponse
@@ -29,9 +31,10 @@ internal class GetAllAvaliableScheduleHandler(IScheduleRepository repository) : 
 
 
 
-public record GetAllAvaliableScheduleQuery(
+public record GetAllScheduleQuery(
     Guid? PhysicianId,
-    DateTime? StartTime,
+    DateTimeOffset? StartTime,
     int? Skip,
+    bool? OnlyAvaliable,
     int? Top = 50
 ) : IRequest<Result<IEnumerable<GetScheduleResponse>>>;

@@ -2,6 +2,7 @@
 using Domain.Entities;
 using FluentResults;
 using MediatR;
+using System;
 
 namespace Application.UseCases.Appointment;
 
@@ -33,8 +34,8 @@ public record GetAppointmentResponse
         Guid PatientId,
         Guid PhysicianId,
         AppointmentStatus Status,
-        DateTime StartTime,
-        DateTime EndTime,
-        DateTime CreatedAt);
+        DateTimeOffset StartTime,
+        DateTimeOffset EndTime,
+        DateTimeOffset CreatedAt);
 
 public record GetAppointmentQuery(Guid Id) : IRequest<Result<GetAppointmentResponse>>;
