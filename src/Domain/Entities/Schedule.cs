@@ -7,23 +7,23 @@ public class Schedule
         Id = Guid.CreateVersion7();
         PhysicianId = physicianId;
         CreatedAt = DateTime.UtcNow;
-        StartTime = startTime;
-        EndTime = endTime;
+        StartTime = startTime.ToUniversalTime();
+        EndTime = endTime.ToUniversalTime();
     }
     public Schedule(Guid id, ICollection<Appointment> appointments, Physician physician, DateTimeOffset createdAt, DateTimeOffset startTime, DateTimeOffset endTime)
     {
         Physician = physician;
-        CreatedAt = createdAt;
-        StartTime = startTime;
-        EndTime = endTime;
+        CreatedAt = createdAt.ToUniversalTime();
+        StartTime = startTime.ToUniversalTime();
+        EndTime = endTime.ToUniversalTime();
         Id = id;
         Appointments = appointments;
         PhysicianId = physician.Id;
     }
     public void Update(DateTime startTime, DateTime endTime)
     {
-        StartTime = startTime;
-        EndTime = endTime;
+        StartTime = startTime.ToUniversalTime();
+        EndTime = endTime.ToUniversalTime();
     }
     public Schedule()
     {

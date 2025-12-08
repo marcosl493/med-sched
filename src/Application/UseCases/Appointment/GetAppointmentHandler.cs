@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces.Repositories;
+using Application.UseCases.Patient;
 using Domain.Entities;
 using FluentResults;
 using MediatR;
-using System;
 
 namespace Application.UseCases.Appointment;
 
@@ -17,7 +17,7 @@ internal class GetAppointmentHandler(IAppointmentRepository repository) : IReque
         var response = new GetAppointmentResponse
             (
                 result.Id,
-                result.PatientId,
+                new GetPatientResult(result.Patient.Id, result.Patient.User.Name, result.Patient.User.Email, result.Patient.DateOfBirth),
                 result.Schedule.PhysicianId,
                 result.Status,
                 result.Schedule.StartTime,
@@ -31,7 +31,7 @@ internal class GetAppointmentHandler(IAppointmentRepository repository) : IReque
 public record GetAppointmentResponse
     (
         Guid Id,
-        Guid PatientId,
+        GetPatientResult Patient,
         Guid PhysicianId,
         AppointmentStatus Status,
         DateTimeOffset StartTime,
