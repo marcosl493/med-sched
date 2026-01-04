@@ -12,6 +12,11 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public Task DeleteAsync(Guid id, CancellationToken cancellationToken)
+        => context.Schedules
+            .Where(sched => sched.Id == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
     public async Task<(Schedule[] Schedules, int Count)> GetAllScheduleAsync(Guid? physicianId, DateTimeOffset? startTime, bool? onlyAvaliable, int top, int? skip, CancellationToken cancellationToken)
     {
         var query = context.Schedules
@@ -56,6 +61,13 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
                                      ((sched.StartTime < endTime.ToUniversalTime() && sched.EndTime > startTime.ToUniversalTime()) ||
                                       (sched.StartTime >= startTime.ToUniversalTime() && sched.EndTime <= endTime.ToUniversalTime())),
                               cancellationToken);
+
+    public Task<bool> IsAvaliableToDeleteAsync(Guid id, CancellationToken cancellationToken)
+        => context.Schedules
+                  .Include(sched => sched.Appointments)
+                  .AnyAsync(sched => sched.Id == id 
+                  && !sched.Appointments.Any(appointment => appointment.Status == AppointmentStatus.SCHEDULED), cancellationToken);
+
     public Task UpdateScheduleAsync(Schedule schedule, CancellationToken cancellationToken)
     {
         context.Schedules.Update(schedule);

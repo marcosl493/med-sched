@@ -10,12 +10,14 @@ public static class ScheduleEndpoints
 {
     public static void MapScheduleEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/schedules").WithTags("Schedules");
+        var group = app.MapGroup("/api/schedules")
+            .WithTags("Schedules")
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
         group.MapGet("/{id:guid}", GetScheduleByIdAsync)
             .WithName(nameof(GetScheduleByIdAsync))
             .Produces<GetScheduleResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
-            .ProducesValidationProblem()
             .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
             .WithDescription("Consulta pelo Id um horário de atendimento cadastrado.");
 
@@ -26,6 +28,8 @@ public static class ScheduleEndpoints
             .ProducesValidationProblem()
             .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
             .WithDescription("Consulta todos os horários disponíveis para agendamento, dado um médico.");
+
+       
     }
     private static async Task<IResult> GetScheduleByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
@@ -44,4 +48,5 @@ public static class ScheduleEndpoints
         var result = await mediator.Send(new GetAllScheduleQuery(physicianId, startTime, skip, onlyAvailable, top), cancellationToken);
         return result.ToHttpResult();
     }
+
 }
