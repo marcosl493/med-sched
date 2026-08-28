@@ -28,6 +28,12 @@ public static class PhysicianEndpoints
             .ProducesValidationProblem()
             .RequireAuthorization(Policies.PhysicianSameUser)
             .WithDescription("Atualiza um horário disponível para um médico.");
+        group.MapDelete("{id:guid}/schedules/{scheduleId:guid}", DeleteAsync)
+           .WithName(nameof(DeleteAsync))
+           .Produces(StatusCodes.Status204NoContent)
+           .Produces(StatusCodes.Status404NotFound)
+           .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
+           .WithDescription("Deleta um horário disponível, dado um médico.");
 
     }
     private static async Task<IResult> CreateSchedule([FromRoute] Guid id,
@@ -50,6 +56,16 @@ public static class PhysicianEndpoints
     {
         var result = await mediator
             .Send(new UpdateScheduleCommand(scheduleId, id, request.StartTime, request.EndTime), cancellationToken);
+        return result.ToHttpResult();
+    }
+    private static async Task<IResult> DeleteAsync
+    (
+        [FromRoute] Guid id,
+        [FromRoute] Guid scheduleId,
+        [FromServices] IMediator mediator,
+        CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new DeleteScheduleRequest(id, scheduleId), cancellationToken);
         return result.ToHttpResult();
     }
 }

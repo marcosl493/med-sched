@@ -10,37 +10,43 @@ public static class ScheduleEndpoints
 {
     public static void MapScheduleEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/api/schedules").WithTags("Schedules");
+        var group = app.MapGroup("/api/schedules")
+            .WithTags("Schedules")
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status500InternalServerError);
         group.MapGet("/{id:guid}", GetScheduleByIdAsync)
             .WithName(nameof(GetScheduleByIdAsync))
             .Produces<GetScheduleResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
-            .ProducesValidationProblem()
-            .RequireAuthorization(Policies.Patient)
+            .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
             .WithDescription("Consulta pelo Id um horário de atendimento cadastrado.");
 
-        group.MapGet("/", GetAllAvaliableScheduleAsync)
-            .WithName(nameof(GetAllAvaliableScheduleAsync))
+        group.MapGet("/", GetAllScheduleAsync)
+            .WithName(nameof(GetAllScheduleAsync))
             .Produces<IEnumerable<GetScheduleResponse>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem()
-            .RequireAuthorization(Policies.Patient)
-            .WithDescription("Consulta todos os horários disponíveis para agendamento, com seus respectivos médicos e especialidade.");
+            .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
+            .WithDescription("Consulta todos os horários disponíveis para agendamento, dado um médico.");
+
+       
     }
     private static async Task<IResult> GetScheduleByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new GetScheduleCommand(id), cancellationToken);
         return result.ToHttpResult();
     }
-    private static async Task<IResult> GetAllAvaliableScheduleAsync
-        ([FromQuery] Guid? physicianId,
+    private static async Task<IResult> GetAllScheduleAsync
+        ([FromQuery] Guid physicianId,
          [FromQuery] int? skip,
+         [FromQuery] bool? onlyAvailable,
          [FromServices] IMediator mediator,
          CancellationToken cancellationToken,
          [FromQuery] DateTime? startTime = default,
          [FromQuery] int top = 50)
     {
-        var result = await mediator.Send(new GetAllAvaliableScheduleQuery(physicianId, startTime, skip, top), cancellationToken);
+        var result = await mediator.Send(new GetAllScheduleQuery(physicianId, startTime, skip, onlyAvailable, top), cancellationToken);
         return result.ToHttpResult();
     }
+
 }

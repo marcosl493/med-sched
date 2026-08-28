@@ -32,8 +32,8 @@ internal class GetScheduleHandler(IScheduleRepository repository) : IRequestHand
 public record GetScheduleResponse(
     Guid Id,
     bool IsAvaliable,
-    DateTime StartTime,
-    DateTime EndTime,
+    DateTimeOffset StartTime,
+    DateTimeOffset EndTime,
     PhysicianDto Physician
 );
 public record PhysicianDto(
