@@ -1,9 +1,13 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Interfaces;
+using Application.Interfaces.Repositories;
+using Confluent.Kafka;
+using Infrastructure.Messaging;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text;
 
@@ -22,7 +26,8 @@ public static class DependencyInjections
             );
         services
             .AddLogging()
-            .AddRepositories();
+            .AddRepositories()
+            .AddProducer(configuration);
         return services;
     }
     private static string BuildConnectionString(this IConfiguration configuration, string name)
@@ -51,6 +56,20 @@ public static class DependencyInjections
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
         return services;
     }
+    private static IServiceCollection AddProducer(this IServiceCollection services, IConfiguration configuration)
+    {
 
+        services.AddOptionsWithValidateOnStart<KafkaProducer.Options>()
+                .Bind(configuration.GetSection(KafkaProducer.Options.SectionName))
+                .ValidateDataAnnotations();
+
+        services.AddSingleton((sp) => new ProducerConfig
+        {
+            BootstrapServers = sp.GetRequiredService<IOptions<KafkaProducer.Options>>().Value.BootstrapServers
+        });
+
+        services.AddSingleton<IPublisherEvent, KafkaProducer>();
+        return services;
+    }
 
 }
