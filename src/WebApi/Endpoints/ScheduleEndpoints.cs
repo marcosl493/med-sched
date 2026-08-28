@@ -29,7 +29,7 @@ public static class ScheduleEndpoints
             .RequireAuthorization(Policies.PhysicianSameUserOrPatient)
             .WithDescription("Consulta todos os horários disponíveis para agendamento, dado um médico.");
 
-       
+
     }
     private static async Task<IResult> GetScheduleByIdAsync([FromRoute] Guid id, [FromServices] IMediator mediator, CancellationToken cancellationToken)
     {

@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Messaging;
 
@@ -16,10 +17,10 @@ public sealed class KafkaProducer
 
     public Task ProduceEventAsync(string topic, string key, string value, CancellationToken cancellationToken = default)
     {
+        _logger.LogDebug("Producing message to topic '{Topic}' with key '{Key}'", topic, key);
 
         _producer.Produce(topic, new Message<string, string> { Key = key, Value = value }, deliveryReport =>
         {
-            _logger.LogDebug("Producing message to topic '{Topic}' with key '{Key}'", topic, key);
 
             if (deliveryReport.Status == PersistenceStatus.Persisted || deliveryReport.Error == null || !deliveryReport.Error.IsError)
             {
@@ -28,7 +29,7 @@ public sealed class KafkaProducer
             }
             else
             {
-                _logger.LogError("Failed to deliver message to topic '{Topic}' with key '{Key}'", topic, key);
+                _logger.LogError("Failed to deliver message to topic '{Topic}' with key '{Key}': {@Error}", topic, key, deliveryReport.Error);
             }
         });
 
@@ -51,6 +52,7 @@ public sealed class KafkaProducer
     public sealed class Options
     {
         public const string SectionName = "Kafka:Producer";
+        [Required]
         public string BootstrapServers { get; set; } = null!;
         public Acks Acks { get; set; } = Acks.All;
         public int MessageTimeoutMs { get; set; } = 30000;
