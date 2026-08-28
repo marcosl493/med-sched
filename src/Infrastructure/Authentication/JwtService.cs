@@ -16,7 +16,8 @@ public class JwtService(IOptionsSnapshot<JwtOptions> options) : ITokenService
         var claims = new[]
            {
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
-                new Claim(ClaimTypes.Role, role.ToString())
+                new Claim(ClaimTypes.Role, role.ToString()),
+                new Claim(JwtRegisteredClaimNames.Aud, options.Audience)
             };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.SecretKey));
