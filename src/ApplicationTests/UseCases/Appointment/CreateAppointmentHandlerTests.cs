@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.Interfaces;
+using Application.Interfaces.Repositories;
 using Application.UseCases.Appointment;
 using Moq;
 namespace ApplicationTests.UseCases.Appointment;
@@ -8,6 +9,7 @@ public class CreateAppointmentHandlerTests
 {
     private Mock<IAppointmentRepository> _appointmentRepositoryMock = null!;
     private Mock<IPatientRepository> _patientRepositoryMock = null!;
+    private Mock<IPublisherEvent> _publisherMock = null!;
     private CreateAppointmentHandler _handler = null!;
     private Guid _patientId;
     private Guid _scheduleId;
@@ -18,7 +20,12 @@ public class CreateAppointmentHandlerTests
     {
         _appointmentRepositoryMock = new Mock<IAppointmentRepository>();
         _patientRepositoryMock = new Mock<IPatientRepository>();
-        _handler = new CreateAppointmentHandler(_appointmentRepositoryMock.Object, _patientRepositoryMock.Object);
+        _publisherMock = new Mock<IPublisherEvent>();
+        _publisherMock
+            .Setup(p => p.ProduceEventAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _handler = new CreateAppointmentHandler(_appointmentRepositoryMock.Object, _patientRepositoryMock.Object, _publisherMock.Object);
         _patientId = Guid.NewGuid();
         _scheduleId = Guid.NewGuid();
         _reason = "Consulta de rotina";

@@ -30,7 +30,7 @@ public static class DependencyInjections
             .AddProducer(configuration);
         return services;
     }
-    private static string BuildConnectionString(this IConfiguration configuration, string name)
+    public static string BuildConnectionString(this IConfiguration configuration, string name)
     {
         var username = configuration.GetValue<string>("DB_USERNAME") ?? throw new InvalidOperationException("Database username not found.");
         var password = configuration.GetValue<string>("DB_PASSWORD") ?? throw new InvalidOperationException("Database password not found.");
@@ -54,6 +54,8 @@ public static class DependencyInjections
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
         services.AddScoped<IPhysicianRepository, PhysicianRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+
+
         return services;
     }
     private static IServiceCollection AddProducer(this IServiceCollection services, IConfiguration configuration)
@@ -69,6 +71,21 @@ public static class DependencyInjections
         });
 
         services.AddSingleton<IPublisherEvent, KafkaProducer>();
+        return services;
+    }
+    public static IServiceCollection AddNotifyRepository(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<PushwooshNotificationRepository.Options>()
+                .Bind(configuration.GetSection(PushwooshNotificationRepository.Options.SectionName))
+                .ValidateDataAnnotations();
+
+        services.AddHttpClient<INotificationRepository, PushwooshNotificationRepository>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<PushwooshNotificationRepository.Options>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", options.ApiToken);
+        });
         return services;
     }
 

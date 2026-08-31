@@ -7,6 +7,20 @@ public sealed record AppointmentCreatedEvent(
     string Reason,
     AppointmentStatus Status,
     Guid PatientId,
-    Guid ScheduleId,
+    UserDto User,
+    ScheduleDto Schedule,
     DateTimeOffset CreatedAt
 );
+
+public sealed record UserDto
+    (
+        Guid UserId,
+        string Name,
+        string Email
+    );
+public sealed record ScheduleDto
+    (
+        Guid ScheduleId,
+        DateTimeOffset StartTime,
+        DateTimeOffset EndTime
+    );
