@@ -1,9 +1,8 @@
-using Application.Integration.Pushwoosh;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Confluent.Kafka;
 using Domain.Events;
 using Microsoft.Extensions.Options;
-using System.Globalization;
 using System.Text.Json;
 
 namespace Jobs.Consumers.Consumers;
@@ -14,122 +13,74 @@ public class AppointmentNotificationConsumer
         ConsumerConfig consumerConfig,
         INotificationRepository notificationRepository,
         IDeviceRepository deviceRepository,
-        IOptions<AppointmentNotificationConsumer.Options> options
+        IOptions<AppointmentNotificationConsumer.Options> options,
+        IAppointmentNotificationFactory appointmentNotificationFactory
     ) : BackgroundService
 {
-    public sealed class Options
-    {
-        public const string SectionName = "AppointmentCreatedNotificationConsumer";
-        public Dictionary<string, Message> Messages { get; set; } = [];
-        public sealed class Message
-        {
-            public string Title { get; set; } = string.Empty;
-            public string Body { get; set; } = string.Empty;
-        }
-        public string ApplicationCode { get; set; } = string.Empty;
-    }
+
     private readonly Options optionsValue = options.Value;
+    private readonly IAppointmentNotificationFactory _appointmentNotificationFactory = appointmentNotificationFactory;
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         const string topic = "appointment-created";
         using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
         consumer.Subscribe(topic);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var consumeResult = consumer.Consume(stoppingToken);
-            var message = JsonSerializer.Deserialize<AppointmentCreatedEvent>(consumeResult.Message.Value);
+            var message = DeserializeEvent(consumeResult.Message.Value);
+
             if (message?.User is null)
             {
-                logger.LogWarning("Received null message from topic {Topic}", topic);
-                continue;
-            }
-            var devices = await deviceRepository.GetDevicesByUserIdAsync(message.User.UserId, stoppingToken);
-
-            if (devices.Count == 0)
-            {
-                logger.LogWarning("No devices found for user {UserId}", message.User.UserId);
+                logger.LogWarning("Received null or invalid message from topic {Topic}", topic);
                 continue;
             }
 
-            var content = new Dictionary<string, LocalizedContentItem>();
-
-            foreach (var item in optionsValue.Messages)
+            try
             {
-                content.TryAdd(item.Key, new LocalizedContentItem
-                {
-                    Android = new PlatformContent
-                    {
-                        Title = FormatTemplate(item.Value.Title, message, item.Key),
-                        Body = FormatTemplate(item.Value.Body, message, item.Key)
-                    },
-                    Ios = new PlatformContent
-                    {
-                        Title = FormatTemplate(item.Value.Title, message, item.Key),
-                        Body = FormatTemplate(item.Value.Body, message, item.Key)
-                    }
-                });
+                await ProcessEventAsync(message, stoppingToken);
             }
-
-            var notificationRequest = new PushwooshNotifyRequest
+            catch (Exception ex)
             {
-                Transactional = new NotifyTransactional
-                {
-                    Application = optionsValue.ApplicationCode,
-                    Schedule = new Schedule
-                    {
-                        At = DateTimeOffset.Now.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                        FollowUserTimezone = false,
-                    },
-                    Payload = new Payload
-                    {
-                        Content = new Content
-                        {
-                            LocalizedContent = content
-                        }
-                    },
-                    PushTokens = new IdentifierList
-                    {
-                        List = devices.Select(d => d.PushToken)
-                    },
-                    ReturnUnknownIdentifiers = true,
-                    MessageType = "MESSAGE_TYPE_TRANSACTIONAL"
-                }
-            };
-            var response = await notificationRepository.NotifyAsync(notificationRequest, stoppingToken);
+                logger.LogError(ex, "Error processing appointment-created event {AppointmentId}", message.Id);
+            }
 
             _ = consumer.Commit();
         }
     }
 
-    private static string FormatTemplate(string template, AppointmentCreatedEvent message, string localeKey)
+    private AppointmentCreatedEvent? DeserializeEvent(string payload)
     {
-        if (string.IsNullOrEmpty(template))
+        if (string.IsNullOrWhiteSpace(payload))
         {
-            return template ?? string.Empty;
+            return null;
         }
-        var result = template;
 
-        if (message is { Schedule: not null } && !string.IsNullOrEmpty(localeKey))
+        try
         {
-            result = result.Replace("{UserName}", message.User.Name ?? string.Empty);
-
-            if (localeKey.StartsWith("pt", StringComparison.OrdinalIgnoreCase))
-            {
-                result = result.Replace("{AppointmentDate}", message.Schedule.StartTime.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture));
-                result = result.Replace("{AppointmentTime}", message.Schedule.StartTime.ToString("HH:mm", CultureInfo.InvariantCulture));
-            }
-            else if (!string.IsNullOrEmpty(localeKey) && localeKey.StartsWith("en", StringComparison.OrdinalIgnoreCase))
-            {
-                result = result.Replace("{AppointmentDate}", message.Schedule.StartTime.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
-                result = result.Replace("{AppointmentTime}", message.Schedule.StartTime.ToString("hh:mm tt", CultureInfo.InvariantCulture));
-            }
-            else
-            {
-                result = result.Replace("{AppointmentDate}", message.Schedule.StartTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-                result = result.Replace("{AppointmentTime}", message.Schedule.StartTime.ToString("HH:mm", CultureInfo.InvariantCulture));
-            }
-
+            return JsonSerializer.Deserialize<AppointmentCreatedEvent>(payload);
         }
-        return result;
+        catch (JsonException je)
+        {
+            logger.LogWarning(je, "Failed to deserialize AppointmentCreatedEvent");
+            return null;
+        }
     }
+
+    private async Task ProcessEventAsync(AppointmentCreatedEvent message, CancellationToken cancellationToken)
+    {
+        var devices = await deviceRepository.GetDevicesByUserIdAsync(message.User.UserId, cancellationToken);
+
+        if (devices.Count == 0)
+        {
+            logger.LogWarning("No devices found for user {UserId}", message.User.UserId);
+            return;
+        }
+
+        var request = _appointmentNotificationFactory.Create(message, devices);
+
+        await notificationRepository.NotifyAsync(request, cancellationToken);
+    }
+
 }

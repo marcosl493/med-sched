@@ -1,5 +1,5 @@
-﻿using Application.Interfaces;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Domain.Events;
 using FluentResults;
 using MediatR;

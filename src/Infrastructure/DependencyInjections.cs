@@ -1,5 +1,5 @@
-﻿using Application.Interfaces;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Confluent.Kafka;
 using Infrastructure.Messaging;
 using Infrastructure.Persistence;

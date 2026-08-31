@@ -1,4 +1,7 @@
+using Application.Factorys;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Application.Options;
 using Confluent.Kafka;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -7,8 +10,8 @@ using Jobs.Consumers.Consumers;
 using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
-builder.Services.AddOptionsWithValidateOnStart<AppointmentNotificationConsumer.Options>()
-    .BindConfiguration(AppointmentNotificationConsumer.Options.SectionName)
+builder.Services.AddOptionsWithValidateOnStart<AppointmentCreatedNotificationOptions>()
+    .BindConfiguration(AppointmentCreatedNotificationOptions.SectionName)
     .ValidateDataAnnotations();
 
 builder
@@ -31,6 +34,9 @@ builder.Services.AddSingleton(sp => new ConsumerConfig
 });
 
 builder.Services.AddHostedService<AppointmentNotificationConsumer>();
+
+// Register notification factory used by the consumer
+builder.Services.AddSingleton<IAppointmentNotificationFactory, AppointmentNotificationFactory>();
 
 var host = builder.Build();
 host.Run();

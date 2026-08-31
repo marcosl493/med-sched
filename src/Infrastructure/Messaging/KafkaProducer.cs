@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Services;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
