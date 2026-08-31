@@ -24,6 +24,7 @@ public class User
     {
         return BCrypt.Net.BCrypt.Verify(passwordInput, HashedPassword);
     }
+    public virtual ICollection<Device> Devices { get; private set; } = [];
 }
 public enum UserRole
 {

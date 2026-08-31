@@ -10,6 +10,7 @@ public class MedSchedDbContext(DbContextOptions<MedSchedDbContext> options) : Db
     public DbSet<Schedule> Schedules { get; set; } = null!;
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Physician> Physicians { get; set; } = null!;
+    public DbSet<Device> Devices { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(MedSchedDbContext).Assembly);
