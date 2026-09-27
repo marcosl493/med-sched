@@ -18,10 +18,9 @@ public static class AuthenticationExtensions
 {
     public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOptions<JwtOptions>()
+        services.AddOptionsWithValidateOnStart<JwtOptions>()
             .Bind(configuration.GetSection(JwtOptions.SectionName))
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
+            .ValidateDataAnnotations();
 
         using var sp = services.BuildServiceProvider();
         var jwtOptions = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
