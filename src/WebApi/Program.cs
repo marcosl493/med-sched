@@ -42,5 +42,4 @@ app.MapPatientEndpoints();
 app.MapPhysicianEndpoints();
 app.MapScheduleEndpoints();
 app.MapAppointmentEndpoints();
-app.Run();
-
+await app.RunAsync();
