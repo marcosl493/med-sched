@@ -1,5 +1,5 @@
-﻿using Application.Interfaces;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using FluentResults;
 using MediatR;
@@ -26,8 +26,8 @@ public class LoginHandler(IUserRepository repository,
             return Result.Fail<LoginResult>(new Error("user or password invalid.").WithMetadata("StatusCode", 401));
         }
 
-        var token = tokenService.CreateToken(userIdRole.Value, user.Email, user.Role);
-        return Result.Ok(new LoginResult(token.AccessToken, token.ExpiresIn, token.TokenType));
+        var (AccessToken, TokenType, ExpiresIn) = tokenService.CreateToken(userIdRole!.Value, user.Email, user.Role);
+        return Result.Ok(new LoginResult(AccessToken, ExpiresIn, TokenType));
     }
 }
 

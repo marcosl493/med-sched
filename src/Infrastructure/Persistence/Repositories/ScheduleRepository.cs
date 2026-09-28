@@ -65,7 +65,7 @@ public class ScheduleRepository(MedSchedDbContext context) : IScheduleRepository
     public Task<bool> IsAvaliableToDeleteAsync(Guid id, CancellationToken cancellationToken)
         => context.Schedules
                   .Include(sched => sched.Appointments)
-                  .AnyAsync(sched => sched.Id == id 
+                  .AnyAsync(sched => sched.Id == id
                   && !sched.Appointments.Any(appointment => appointment.Status == AppointmentStatus.SCHEDULED), cancellationToken);
 
     public Task UpdateScheduleAsync(Schedule schedule, CancellationToken cancellationToken)

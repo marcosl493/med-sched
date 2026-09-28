@@ -13,4 +13,5 @@ public interface IAppointmentRepository
         AppointmentStatus? status,
         int? skip,
         CancellationToken cancellationToken);
+
 }

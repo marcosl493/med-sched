@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MedSchedDbContext))]
-    partial class MedSchedDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260829172149_AddDeviceEntity")]
+    partial class AddDeviceEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -64,12 +67,6 @@ namespace Infrastructure.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ApplicationCode")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .IsUnicode(true)
-                        .HasColumnType("character varying(15)");
-
                     b.Property<string>("ApplicationVersion")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -87,9 +84,6 @@ namespace Infrastructure.Persistence.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(true)
                         .HasColumnType("character varying(100)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DeviceModel")
                         .IsRequired()

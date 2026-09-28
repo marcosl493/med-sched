@@ -1,9 +1,13 @@
 ﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Confluent.Kafka;
+using Infrastructure.Messaging;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Text;
 
@@ -22,10 +26,11 @@ public static class DependencyInjections
             );
         services
             .AddLogging()
-            .AddRepositories();
+            .AddRepositories()
+            .AddProducer(configuration);
         return services;
     }
-    private static string BuildConnectionString(this IConfiguration configuration, string name)
+    public static string BuildConnectionString(this IConfiguration configuration, string name)
     {
         var username = configuration.GetValue<string>("DB_USERNAME") ?? throw new InvalidOperationException("Database username not found.");
         var password = configuration.GetValue<string>("DB_PASSWORD") ?? throw new InvalidOperationException("Database password not found.");
@@ -49,8 +54,39 @@ public static class DependencyInjections
         services.AddScoped<IScheduleRepository, ScheduleRepository>();
         services.AddScoped<IPhysicianRepository, PhysicianRepository>();
         services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+
+
         return services;
     }
+    private static IServiceCollection AddProducer(this IServiceCollection services, IConfiguration configuration)
+    {
 
+        services.AddOptionsWithValidateOnStart<KafkaProducer.Options>()
+                .Bind(configuration.GetSection(KafkaProducer.Options.SectionName))
+                .ValidateDataAnnotations();
+
+        services.AddSingleton((sp) => new ProducerConfig
+        {
+            BootstrapServers = sp.GetRequiredService<IOptions<KafkaProducer.Options>>().Value.BootstrapServers
+        });
+
+        services.AddSingleton<IPublisherEvent, KafkaProducer>();
+        return services;
+    }
+    public static IServiceCollection AddNotifyRepository(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptionsWithValidateOnStart<PushwooshNotificationRepository.Options>()
+                .Bind(configuration.GetSection(PushwooshNotificationRepository.Options.SectionName))
+                .ValidateDataAnnotations();
+
+        services.AddHttpClient<INotificationRepository, PushwooshNotificationRepository>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<PushwooshNotificationRepository.Options>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", options.ApiToken);
+        });
+        return services;
+    }
 
 }

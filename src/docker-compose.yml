@@ -11,6 +11,32 @@ services:
       POSTGRES_DB: ${DB_NAME:-MedSched}
     ports:
       - "5433:5432"
+  kafka:
+    image: apache/kafka:3.9.0
+    container_name: medsched-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: medsched-kafka-ui
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: medsched
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
   webapi:
     image: ${DOCKER_REGISTRY-}webapi
     container_name: medsched-webapi
@@ -26,8 +52,12 @@ services:
       Jwt__ExpiresInMinutes: 15
       Jwt__Issuer: ${JWT_ISSUER:-med-sched.webapi}
       Jwt__SecretKey: ${JWT_SECRET_KEY:?Defina JWT_SECRET_KEY no arquivo .env}
+      Kafka__Producer__BootstrapServers: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      Kafka__Producer__Acks: ${KAFKA_PRODUCER_ACKS:-All}
+      Kafka__Producer__MessageTimeoutMs: ${KAFKA_PRODUCER_MESSAGE_TIMEOUT_MS:-30000}
     build:
       context: .
       dockerfile: WebApi/Dockerfile
     depends_on:
-     - db
+      - db
+      - kafka
