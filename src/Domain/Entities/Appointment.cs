@@ -9,8 +9,8 @@ public class Appointment
     public virtual Patient Patient { get; private set; } = null!;
     public Guid ScheduleId { get; private set; }
     public virtual Schedule Schedule { get; private set; } = null!;
-    public DateTime CreatedAt { get; private set; }
-    public DateTime UpdatedAt { get; private set; }
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset UpdatedAt { get; private set; }
     public Appointment(string reason, Guid scheduleId, Guid patientId)
     {
         Id = Guid.CreateVersion7();

@@ -61,15 +61,16 @@ dotnet run
 
 A API estará disponível em `https://localhost:7271` ou `http://localhost:5051`.
 
-6. Executando com Docker Compose:
+6. Executando com Podman Compose:
 
-Na pasta `WebApi`, execute:
+O arquivo `src/.env.example` lista as variáveis esperadas. Copie-o para `src/.env`, ajuste os valores e execute na pasta `src`:
 
 ```bash
-docker-compose up --build
+cp .env.example .env
+podman compose up --build
 ```
 
-* O Docker Compose irá iniciar tanto a API quanto o banco PostgreSQL.
+* O Compose irá iniciar tanto a API quanto o banco PostgreSQL.
 * Ao criar o volume do PostgreSQL, o **script inicial do banco é executado automaticamente**.
 
 A API estará disponível em `http://localhost:4000`.

@@ -20,4 +20,4 @@ internal class GetPatientHandler(IPatientRepository repository) : IRequestHandle
 
 public record GetPatientByIdQuery(Guid Id) : IRequest<Result<GetPatientResult>>;
 
-public record GetPatientResult(Guid Id, string Name, string Email, DateTime DateOfBirth);
+public record GetPatientResult(Guid Id, string Name, string Email, DateTimeOffset DateOfBirth);
