@@ -56,5 +56,7 @@ public sealed class KafkaProducer
         public string BootstrapServers { get; set; } = null!;
         public Acks Acks { get; set; } = Acks.All;
         public int MessageTimeoutMs { get; set; } = 30000;
+        public string? SaslUsername { get; set; }
+        public string? SaslPassword { get; set; }
     }
 }

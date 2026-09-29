@@ -65,9 +65,25 @@ public static class DependencyInjections
                 .Bind(configuration.GetSection(KafkaProducer.Options.SectionName))
                 .ValidateDataAnnotations();
 
-        services.AddSingleton((sp) => new ProducerConfig
+        services.AddSingleton(sp =>
         {
-            BootstrapServers = sp.GetRequiredService<IOptions<KafkaProducer.Options>>().Value.BootstrapServers
+            var options = sp.GetRequiredService<IOptions<KafkaProducer.Options>>().Value;
+            var producerConfig = new ProducerConfig
+            {
+                BootstrapServers = options.BootstrapServers,
+                Acks = options.Acks,
+                MessageTimeoutMs = options.MessageTimeoutMs
+            };
+
+            if (!string.IsNullOrWhiteSpace(options.SaslPassword))
+            {
+                producerConfig.SecurityProtocol = SecurityProtocol.SaslSsl;
+                producerConfig.SaslMechanism = SaslMechanism.Plain;
+                producerConfig.SaslUsername = options.SaslUsername ?? "$ConnectionString";
+                producerConfig.SaslPassword = options.SaslPassword;
+            }
+
+            return producerConfig;
         });
 
         services.AddSingleton<IPublisherEvent, KafkaProducer>();

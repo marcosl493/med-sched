@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/core/">
+    <Project Path="Application/Application.csproj" />
+    <Project Path="Domain/Domain.csproj" />
+    <Project Path="Infrastructure/Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Itens de Solução/">
+    <File Path="../README.md" />
+    <File Path="../scripts/init.sql" />
+  </Folder>
+  <Folder Name="/presentation/">
+    <Project Path="Jobs.Consumers/Jobs.Consumers.csproj" />
+    <Project Path="WebApi/WebApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="ApplicationTests/ApplicationTests.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

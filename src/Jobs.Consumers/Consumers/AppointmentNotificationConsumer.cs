@@ -2,7 +2,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Confluent.Kafka;
 using Domain.Events;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace Jobs.Consumers.Consumers;
@@ -13,12 +12,10 @@ public class AppointmentNotificationConsumer
         ConsumerConfig consumerConfig,
         INotificationRepository notificationRepository,
         IDeviceRepository deviceRepository,
-        IOptions<AppointmentNotificationConsumer.Options> options,
         IAppointmentNotificationFactory appointmentNotificationFactory
     ) : BackgroundService
 {
 
-    private readonly Options optionsValue = options.Value;
     private readonly IAppointmentNotificationFactory _appointmentNotificationFactory = appointmentNotificationFactory;
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

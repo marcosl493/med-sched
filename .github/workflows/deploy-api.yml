@@ -1,0 +1,84 @@
+name: Deploy API to Azure Container Apps
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  IMAGE_NAME: medsched-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Test API dependencies
+        run: dotnet test ./src/ApplicationTests/ApplicationTests.csproj --configuration Release
+
+      - name: Build API image
+        env:
+          TAG: ${{ github.sha }}
+        run: |
+          docker build \
+            --file ./src/WebApi/Dockerfile \
+            --tag "$IMAGE_NAME:$TAG" \
+            ./src
+
+      - name: Check tag is on master
+        id: master-check
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        run: |
+          git fetch origin master:refs/remotes/origin/master
+          if git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+            echo "is_master=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_master=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sign in to Azure with OIDC
+        if: steps.master-check.outputs.is_master == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign in to ACR
+        if: steps.master-check.outputs.is_master == 'true'
+        run: az acr login --name "${{ vars.ACR_NAME }}"
+
+      - name: Push API image
+        if: steps.master-check.outputs.is_master == 'true'
+        env:
+          REGISTRY: ${{ vars.ACR_LOGIN_SERVER }}
+          TAG: ${{ github.sha }}
+        run: |
+          docker tag "$IMAGE_NAME:$TAG" "$REGISTRY/$IMAGE_NAME:$TAG"
+          docker push "$REGISTRY/$IMAGE_NAME:$TAG"
+
+      - name: Deploy API container app
+        if: steps.master-check.outputs.is_master == 'true'
+        env:
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          CONTAINER_APP: ${{ vars.API_CONTAINER_APP }}
+          REGISTRY: ${{ vars.ACR_LOGIN_SERVER }}
+          TAG: ${{ github.sha }}
+        run: >-
+          az containerapp update
+          --resource-group "$RESOURCE_GROUP"
+          --name "$CONTAINER_APP"
+          --image "$REGISTRY/$IMAGE_NAME:$TAG"
